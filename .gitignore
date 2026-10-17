@@ -1,0 +1,38 @@
+# macOS / editors
+.DS_Store
+._*
+.idea/
+.vscode/
+*.swp
+*~
+
+# Python environments and caches
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Xcode (keep shared project files and Package.resolved)
+DerivedData/
+build/
+.build/
+xcuserdata/
+*.xcuserstate
+
+# Local configuration and credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Logs and diagram recovery files
+*.log
+*.drawio.bkp
+*.drawio.dtmp
+
+# Generated GitHub export
+github-upload/

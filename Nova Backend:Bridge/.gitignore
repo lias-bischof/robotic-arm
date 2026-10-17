@@ -1,0 +1,7 @@
+.DS_Store
+/robot_bridge
+/tests/test_protocol
+/tests/test_firmware
+/tests/test_bridge
+/firmware/build/
+/tests/test_mqtt_contract
