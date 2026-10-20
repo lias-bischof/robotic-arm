@@ -203,7 +203,7 @@ The CAD views below show the robots mechanical design, including the complete as
 
 <br>
 
-## Electronics 
+## Electronics
 
 The electronics to control the robot consist of an RP2040 PICO controller, four DM556 stepper motor drivers, four two-phase stepper motors and a 36V-10A power supply. 
 Each driver controls a single motor, allowing all joints to be moved at once.
@@ -215,105 +215,46 @@ The sequence diagram below shows how exactly calibration is processed.
 If the PICO controller receives a calibration command via MQTT, it first converts the given calibration angles into motor steps.
 The controller then sends pulse and direction signals to the three joint drivers in parallel. 
 Once all pulse sequences are complete, the PICO controller publishes a receipt via MQTT, reporting that the task is completed.
+A receipt only confirms the generation of pulses. It does not verify that the motor has reached the intended position, 
+as stalls or missed steps can occur.
 
 ![MQTT communication sequence](Protokoll/Kalibrierung-Sequenzdiagramm.png)
 
+To simplify the architecture of our prototype we implemented a host-side C++ bridge to exchange data with the PICO controller via USB. The controller firmware then generates the motor pulses and sends MQTT events back through the bridge.
 
-
-### Implemented Electronics and Control Stack
-
-The checked-in implementation adds a host-side C++ bridge to the simplified architecture shown above. NOVA exchanges MQTT messages with Mosquitto on the host. The bridge converts these requests into newline-delimited JSON commands and sends them to the PICO over USB. The firmware generates the motor pulses and sends events back through the same connection.
-
-| Stage | Implementation | Responsibility |
-|---|---|---|
-| User interface | SwiftUI and RealityKit | Commands, inverse kinematics, waypoints and estimated robot model. |
-| Broker | Mosquitto | MQTT command, state and receipt exchange. |
-| Host bridge | Nova Backend:Bridge/robot_bridge.cpp | Request validation, angle-to-step conversion and USB communication. |
-| Controller | Nova Backend:Bridge/firmware/main.cpp | Pulse generation for four channels and progress/completion events. |
-| Power stage | Four DM556 drivers | Motor winding-current control. |
-| Power supply | 36 V, 10 A | Motor-driver supply, with a nominal DC output rating of 360 W. |
-
-The current firmware generates pulses with GPIO operations and software delays. It does not use PIO for pulse generation or implement a direct Wi-Fi/MQTT client.
 
 ### Motor Channels and GPIO Assignment
 
-The following assignments come from the shared protocol and firmware. GPIO identifiers are not physical header-pin numbers.
+The bridge-channels, GPIO-pins (STEP/DIR) and pulses per joint revolution for base-, shoulder-, arm- and end-effector motor are depicted below.
 
-| Channel | Function | STEP | DIR | Configured pulses per joint revolution |
+| Bridge-Channel | Function | STEP | DIR | Pulses per joint revolution |
 |---|---|---|---|---|
 | 1 | Base | GP0 | GP1 | 1,600 |
 | 2 | Shoulder | GP2 | GP3 | 16,000 |
-| 3 | Gripper | GP4 | GP5 | Fixed relative commands: +80 pulses to open, −80 to close. |
-| 4 | Arm | GP6 | GP7 | 1,600 |
+| 3 | Arm | GP6 | GP7 | 1,600 |
+| 4 | End-Effector | GP4 | GP5 | +80 pulses to open, −80 to close. |
 
-These conversion factors must match the actual motor steps, driver microstepping and mechanical transmission. They are software settings, rather than measurements of positioning accuracy.
-
-GP0–GP7 are initialized as outputs and returned to low after completion, stopping or a handled command error. No separate driver-enable output is implemented. Low STEP/DIR outputs do not disconnect motor power or establish whether holding current remains active.
 
 ### Power and Driver Interface
 
-The controller generates logic signals; the DM556 drivers deliver current to the motor windings. Motor current does not flow through the GPIO pins.
+To control the motors, the PICO controller sends step and direction signals to the DM556 stepper motor drivers, which regulate the current supplied to the motors. The drivers are powered by the 36V-10A DC power supply. The power-supply must not be connected directly to controller logic or GPIO pins. Driver current settings are configured to suit the connected motors.
 
-| Connection group | Purpose |
-|---|---|
-| Driver power input | Motor supply voltage. |
-| A+, A−, B+, B− | Two motor winding pairs. |
-| PUL / STEP | Advances the commanded position by one configured step or microstep per valid pulse. |
-| DIR | Selects rotation direction. |
-| ENA | Driver enable interface; not controlled by the current firmware. |
-| PICO USB | Host communication. |
-
-The [driver manual](Protokoll/DM556%20Driver%20Manual.pdf) and [editable electronics drawing](Protokoll/Elektronik.drawio) are included in the repository. The actual driver version determines the required input levels, input current, polarity and timing. GPIO assignments alone do not establish electrical compatibility.
-
-The 36 V motor supply must not be connected directly to controller logic or GPIO pins. Driver current settings must suit the connected motors. Motor phase-current settings and supply input current describe different parts of the circuit.
-
-### Angle Conversion and Pulse Timing
-
-NOVA sends relative angular changes in radians, ordered as base, shoulder and arm. The bridge converts each change into a signed pulse count by multiplying the angle by the configured pulses per revolution, dividing by 2π and rounding to the nearest integer. The sign determines DIR; the magnitude determines the number of pulses.
-
-| Joint | Maximum relative angular change per request |
-|---|---|
-| Base | 45° |
-| Shoulder | 35° |
-| Arm | 90° |
-
-These are per-command limits, not absolute joint limits or collision checks.
-
-The firmware uses a common tick sequence whose length equals the largest absolute pulse count. Accumulators distribute each channel's pulses across that sequence. The bridge requests a peak tick rate of 80 pulses/s for the most active channel. The firmware ramps from a nominal 40 pulses/s towards the requested peak and back down, using a 120-tick ramp parameter. Processing and telemetry introduce additional overhead.
-
-Firmware validation rejects duplicate channels, fractional pulse counts, invalid channel numbers, all-zero movements and requests above 2,000 pulses per joint channel or 300 pulses for the gripper.
 
 ### USB Communication and Completion
 
-The bridge configures the serial interface for 115,200 baud. Each USB message is one JSON object terminated by a newline. Before connecting to MQTT, the bridge sends a ping and waits for a matching ready event.
+The bridge software was developed with the assistance of AI agents and improved by our team. Each USB message is one JSON object. Before connecting to MQTT, the bridge sends a ping to the controller and waits for a response.
 
-| USB command or event | Meaning |
-|---|---|
-| ping / ready | Firmware handshake. |
-| move | Signed pulse counts for one to four channels. |
-| stop | Request to interrupt pulse generation. |
-| busy | Start of the pulse sequence after initial preparation. |
-| progress | Tick progress at the start, every 250 ticks and at completion. |
-| ready | Completed pulse generation, including executed counts. |
-| stopped | Interrupted motion; an active move reports executed counts. |
-| error | Invalid command or processing failure. |
-
-A completion receipt confirms the generation of pulses. It does not independently confirm the physical motor position.
-
-### Additional MQTT Topics
-
-| Topic | Purpose |
-|---|---|
-| machine/gripper | Maps open/close actions to channel 3. |
-| machine/stop | Requests a firmware stop; the initial receipt acknowledges the request before completion. |
-| machine/status | Structured state details, request identifier and timestamp. |
-| machine/telemetry | Firmware events received over USB. |
-
-Frontend requests contain an id and a payload. Calibration payloads contain three relative angles in radians. The bridge publishes retained READY/BUSY/OFFLINE notifications and non-retained receipts. It rejects retained movement commands and new movements while another request is active.
-
-The supplied broker configuration listens on 127.0.0.1:1883, permits anonymous local clients and disables persistence. The current frontend also defaults to port 1883; the 8003 value in the earlier command table is not the implementation default.
-
-<br>
+| Direction | Event | Description |
+|---|---|---|
+| Pico → Bridge | boot | Firmware is booted up |
+| Bridge → Pico | ping | Checks if the PICO is responding |
+| Pico → Bridge | ready | Responds to the ping |
+| Bridge → Pico | move | Starts a rotation on 1-4 motor channels |
+| Pico → Bridge | busy | Rotation has started |
+| Pico → Bridge | progress | Progress of rotation |
+| Bridge → Pico | stop | Stops the rotation  |
+| Pico → Bridge | stopped | Rotation has been stopped |
+| Pico → Bridge | error | Reports that an error occurred |
 
 ## Repository Structure and Setup
 
