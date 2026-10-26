@@ -68,6 +68,7 @@ class Path {
                 let index = cursor
                 do {
                     try await robot.calibrate(target.position)
+                    try await robot.perform(target.action)
                 } catch {
                     if !Task.isCancelled {
                         logger.log(Path.parseError(error, index: index), kind: .error)
@@ -79,9 +80,9 @@ class Path {
                     break
                 }
                 logger.log("reached target \(index + 1) at \(formatPoint(target.position))", kind: .output)
-                /*if target.action != .NONE {
-                    logger.log("target \(index + 1) action \(target.action.name()) skipped — no tool channel", kind: .system)
-                }*/
+                if target.action != .NONE {
+                    logger.log("target \(index + 1) action \(target.action.name()) executed", kind: .output)
+                }
                 next()
             }
             running = false

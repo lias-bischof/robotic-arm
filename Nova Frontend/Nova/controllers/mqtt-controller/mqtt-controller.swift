@@ -139,7 +139,7 @@ final class MQTTController: @unchecked Sendable {
         topic: String,
         payload: T
     ) async throws {
-        _ = try await sendData(topic: topic, payload: payload, timeout: 20)
+        _ = try await sendData(topic: topic, payload: payload, timeout: 120)
     }
 
     func sendData<T: Encodable>(

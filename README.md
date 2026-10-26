@@ -65,7 +65,7 @@ The commands provided to control and monitor the robot are listed below.
 | `orientation` | Returns the current joint angles |
 | `position` | Returns the current joint positions |
 | `start` | Begins or continues execution of the planned path |
-| `stop` | Pauses execution of the planned path |
+| `stop` | Stops execution of the planned path and sends a hardware stop request (`machine/stop`) |
 | `clear` | Removes all waypoints from the path |
 | `reset` | Resets the path cursor |
 | `connect [host (default = 127.0.0.1)] [port (default = 8003)]` / `disconnect` | Starts or ends the MQTT connection |
@@ -334,7 +334,7 @@ The frontend project is Nova Frontend/Nova.xcodeproj. Its configured macOS deplo
 
 The bridge requires a C++17-capable compiler, libmosquitto and cJSON. Firmware compilation requires the Pico SDK, cJSON, access to the shared protocol.hpp header and USB standard I/O configuration.
 
-The startup script calls make before starting Mosquitto and the bridge. However, the repository does not include the expected Makefile or a firmware CMake/build configuration. Those definitions are needed to reproduce the complete build and flashing workflow from a fresh checkout.
+The startup script calls `make` before starting Mosquitto and the bridge. The repository now includes `/home/runner/work/robotic-arm/robotic-arm/Nova Backend:Bridge/Makefile` with targets for `robot_bridge` and the backend test executables (`make`, `make test`, `make clean`). Firmware flashing still requires a Pico SDK-based workflow in addition to these host-side targets.
 
 Once the bridge binary and flashed firmware are available, the bridge accepts --broker HOST, --mqtt-port PORT and --pico-port DEVICE. Without an explicit device, it searches for a unique /dev/cu.usbmodem* or /dev/ttyACM* port.
 
@@ -368,10 +368,10 @@ These are software tests, rather than measurements of payload, repeatability, mo
 The following details apply to the checked-in implementation:
 
 - **Open-loop position:** No encoder feedback or automatic homing is implemented. Missed steps, backlash and structural deflection can separate the estimated pose from the physical pose.
-- **Frontend stop:** The terminal stop command cancels frontend waypoint execution. It does not publish machine/stop and must not be treated as an immediate hardware stop.
-- **Gripper actions:** The bridge supports the gripper and the frontend stores waypoint actions, but waypoint execution does not currently send those actions.
+- **Frontend stop:** The terminal stop command now cancels frontend waypoint execution and publishes `machine/stop`. Stopping still depends on broker/USB connectivity and firmware response time.
+- **Gripper actions:** Waypoint execution now sends `open`/`close` actions to `machine/gripper` after reaching each target.
 - **Interrupted moves:** The bridge reports executed pulse counts, but the frontend receipt model does not use them to reconstruct partial movement. Physical and estimated state must be reconciled after interruption.
-- **Timeout mismatch:** Ordinary frontend requests time out after 20 s; the bridge allows up to 120 s for an active request. A frontend timeout does not prove that motion has stopped.
+- **Timeouts:** Frontend command requests now use a 120 s timeout to match the bridge execution window for active motions.
 - **Trajectory preview:** The preview uses model joint speeds, rather than motor feedback or an exact simulation of the firmware scheduler.
 - **Hardware revisions:** The electronics drawing labels motors as NEMA 17, while CAD assets include a NEMA 23 model. The older LaTeX draft describes a different controller/gripper configuration. Exact installed parts and driver settings still need an authoritative hardware list.
 - **Physical validation:** Checked-in source files do not establish measured repeatability, payload capacity or thermal performance.
