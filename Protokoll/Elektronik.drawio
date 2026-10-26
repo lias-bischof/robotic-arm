@@ -1,6 +1,6 @@
 <mxfile host="Electron">
   <diagram name="Seite-1" id="jyBbuAYzURGVBJ7oOe4r">
-    <mxGraphModel dx="3764" dy="1985" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="3335" dy="1888" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -16,7 +16,7 @@
         <mxCell id="2IBFDq6mjX1BWdxoquV7-351" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="" vertex="1">
           <mxGeometry height="775" width="360" x="-10" y="142.5" as="geometry" />
         </mxCell>
-        <mxCell id="2IBFDq6mjX1BWdxoquV7-7" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=JetBrains Mono;strokeColor=#FFB570;" value="&lt;div&gt;JKONG&lt;/div&gt;Nema17&lt;br&gt;&lt;div&gt;2-Phasen-Schrittmotor&lt;/div&gt;" vertex="1">
+        <mxCell id="2IBFDq6mjX1BWdxoquV7-7" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=JetBrains Mono;strokeColor=#FFB570;" value="&lt;div&gt;JKONG&lt;/div&gt;Nema23&lt;br&gt;&lt;div&gt;2-Phasen-Schrittmotor&lt;/div&gt;" vertex="1">
           <mxGeometry height="210" width="120" x="80" y="590" as="geometry" />
         </mxCell>
         <mxCell id="2IBFDq6mjX1BWdxoquV7-8" parent="1" style="whiteSpace=wrap;html=1;aspect=fixed;" value="" vertex="1">
@@ -43,7 +43,7 @@
         <mxCell id="2IBFDq6mjX1BWdxoquV7-21" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontFamily=JetBrains Mono;" value="B-" vertex="1">
           <mxGeometry height="30" width="30" x="185" y="685" as="geometry" />
         </mxCell>
-        <mxCell id="2IBFDq6mjX1BWdxoquV7-23" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=JetBrains Mono;strokeColor=#FFB570;" value="&lt;div&gt;JKONG&lt;/div&gt;Nema17&lt;br&gt;&lt;div&gt;2-Phasen-Schrittmotor&lt;/div&gt;" vertex="1">
+        <mxCell id="2IBFDq6mjX1BWdxoquV7-23" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=JetBrains Mono;strokeColor=#FFB570;" value="&lt;div&gt;JKONG&lt;/div&gt;Nema23&lt;br&gt;&lt;div&gt;2-Phasen-Schrittmotor&lt;/div&gt;" vertex="1">
           <mxGeometry height="210" width="120" x="440" y="590" as="geometry" />
         </mxCell>
         <mxCell id="2IBFDq6mjX1BWdxoquV7-24" parent="1" style="whiteSpace=wrap;html=1;aspect=fixed;" value="" vertex="1">
@@ -70,7 +70,7 @@
         <mxCell id="2IBFDq6mjX1BWdxoquV7-31" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontFamily=JetBrains Mono;" value="B-" vertex="1">
           <mxGeometry height="30" width="30" x="545" y="685" as="geometry" />
         </mxCell>
-        <mxCell id="2IBFDq6mjX1BWdxoquV7-32" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=JetBrains Mono;strokeColor=#FFB570;" value="&lt;div&gt;JKONG&lt;/div&gt;Nema17&lt;br&gt;&lt;div&gt;2-Phasen-Schrittmotor&lt;/div&gt;" vertex="1">
+        <mxCell id="2IBFDq6mjX1BWdxoquV7-32" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=JetBrains Mono;strokeColor=#FFB570;" value="&lt;div&gt;JKONG&lt;/div&gt;Nema23&lt;br&gt;&lt;div&gt;2-Phasen-Schrittmotor&lt;/div&gt;" vertex="1">
           <mxGeometry height="210" width="120" x="827" y="585" as="geometry" />
         </mxCell>
         <mxCell id="2IBFDq6mjX1BWdxoquV7-33" parent="1" style="whiteSpace=wrap;html=1;aspect=fixed;" value="" vertex="1">
@@ -97,7 +97,7 @@
         <mxCell id="2IBFDq6mjX1BWdxoquV7-40" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontFamily=JetBrains Mono;" value="B-" vertex="1">
           <mxGeometry height="30" width="30" x="932" y="680" as="geometry" />
         </mxCell>
-        <mxCell id="2IBFDq6mjX1BWdxoquV7-41" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=JetBrains Mono;strokeColor=#FFB570;" value="&lt;div&gt;JKONG&lt;/div&gt;Nema17&lt;br&gt;&lt;div&gt;2-Phasen-Schrittmotor&lt;/div&gt;" vertex="1">
+        <mxCell id="2IBFDq6mjX1BWdxoquV7-41" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=JetBrains Mono;strokeColor=#FFB570;" value="&lt;div&gt;JKONG&lt;/div&gt;Nema23&lt;br&gt;&lt;div&gt;2-Phasen-Schrittmotor&lt;/div&gt;" vertex="1">
           <mxGeometry height="210" width="120" x="1241" y="585" as="geometry" />
         </mxCell>
         <mxCell id="2IBFDq6mjX1BWdxoquV7-42" parent="1" style="whiteSpace=wrap;html=1;aspect=fixed;" value="" vertex="1">
@@ -996,7 +996,7 @@
             <mxPoint x="210" y="267.5" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="2IBFDq6mjX1BWdxoquV7-327" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=JetBrains Mono;fillColor=#fff2cc;strokeColor=#d6b656;" value="MQTT Broker" vertex="1">
+        <mxCell id="2IBFDq6mjX1BWdxoquV7-327" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=JetBrains Mono;fillColor=#fff2cc;strokeColor=#d6b656;" value="NOVA USB-Bridge" vertex="1">
           <mxGeometry height="150" width="108" x="-152" y="180" as="geometry" />
         </mxCell>
         <mxCell id="2IBFDq6mjX1BWdxoquV7-355" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontFamily=JetBrains Mono;fontSize=16;" value="&lt;span style=&quot;background-color: light-dark(#ffffff, var(--ge-dark-color, #121212));&quot;&gt;Basis Joint&lt;/span&gt;" vertex="1">
