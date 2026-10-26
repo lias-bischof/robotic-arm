@@ -265,7 +265,7 @@ The frontend project is Nova Frontend/Nova.xcodeproj. Its configured macOS deplo
 
 The bridge requires a C++17-capable compiler, libmosquitto and cJSON. Firmware compilation requires the Pico SDK, cJSON, access to the shared protocol.hpp header and USB standard I/O configuration.
 
-The startup script calls `make` before starting Mosquitto and the bridge. The repository now includes `/home/runner/work/robotic-arm/robotic-arm/Nova Backend:Bridge/Makefile` with targets for `robot_bridge` and the backend test executables (`make`, `make test`, `make clean`). Firmware flashing still requires a Pico SDK-based workflow in addition to these host-side targets.
+The startup script calls `make` before starting Mosquitto and the bridge. Because the bridge directory contains a colon, run the host-side targets from the repository root with `make -C 'Nova Backend:Bridge'`, `make -C 'Nova Backend:Bridge' test` and `make -C 'Nova Backend:Bridge' clean`. Firmware flashing still requires a Pico SDK-based workflow in addition to these host-side targets.
 
 Once the bridge binary and flashed firmware are available, the bridge accepts --broker HOST, --mqtt-port PORT and --pico-port DEVICE. Without an explicit device, it searches for a unique /dev/cu.usbmodem* or /dev/ttyACM* port.
 
@@ -316,16 +316,6 @@ These are software tests, rather than measurements of payload, repeatability, mo
 - **Trajectory preview:** The preview uses model joint speeds, rather than motor feedback or an exact simulation of the firmware scheduler.
 - **Hardware revisions:** The electronics drawing labels motors as NEMA 17, while CAD assets include a NEMA 23 model. The older LaTeX draft describes a different controller/gripper configuration. Exact installed parts and driver settings still need an authoritative hardware list.
 - **Physical validation:** Checked-in source files do not establish measured repeatability, payload capacity or thermal performance.
-## Current Limitations
-
-The current implementation of our project has the following limitations:
-
-- **Open-loop position:** No encoder feedback or automatic homing is implemented. The control software estimates the prototype position and orientation from the commanded movements rather than measuring them.
-- **End-Effector actions:** The end-effector has not yet been implemented in the prototype and end-effector actions (OPEN/CLOSE/NONE) aren't sent to the PICO controller.
-- **Forward kinematics:** The path preview uses model joint speeds, rather than motor feedback or an exact simulation of the firmware scheduler.
-- **Synchronization**: If another client calibrates the robot, its status is updated across all connected devices. But the change to the robots position is not synchronized yet.
-
-
 ## Learnings
 
 Throughout the project, we encountered challenges in CAD, manufacturing, and programming. 
