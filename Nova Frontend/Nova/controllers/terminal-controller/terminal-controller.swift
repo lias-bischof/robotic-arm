@@ -202,7 +202,25 @@ final class TerminalController {
                 return
             }
             path.stop()
-            logger.log("operation stopped", kind: .output)
+            logger.log("operation stopped, sending hardware stop...", kind: .output)
+            Task {
+                do {
+                    try await robot.stopHardware()
+                    logger.log("hardware stop acknowledged", kind: .output)
+                } catch RobotError.offline {
+                    logger.log("error: robot is offline", kind: .error)
+                } catch MQTTError.offline {
+                    logger.log("error: not connected to a broker", kind: .error)
+                } catch MQTTError.publishFailed {
+                    logger.log("error: failed to publish stop request", kind: .error)
+                } catch MQTTError.commandRejected(let reason) {
+                    logger.log("error: stop request was rejected: \(reason)", kind: .error)
+                } catch MQTTError.timedOut {
+                    logger.log("error: stop request timed out", kind: .error)
+                } catch {
+                    logger.log("error: hardware stop failed — \(error.localizedDescription)", kind: .error)
+                }
+            }
 
         case .resetCursor:
             guard !path.running else {

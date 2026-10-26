@@ -19,6 +19,39 @@ final class RobotController {
     init(mqtt: MQTTController) {
         self.mqtt = mqtt
     }
+
+    func perform(_ action: Action) async throws {
+        guard action != .NONE else { return }
+        if state == .BUSY {
+            throw RobotError.busy
+        }
+        if state == .OFFLINE || state == .CONNECTING {
+            throw RobotError.offline
+        }
+        state = .BUSY
+        do {
+            try await mqtt.sendData(topic: MQTTTopic.gripper, payload: action.name())
+        } catch {
+            if case MQTTError.timedOut = error {
+                state = .OFFLINE
+            } else {
+                state = mqtt.mqttState == .CONNECTED ? .READY : .OFFLINE
+            }
+            throw error
+        }
+        state = .READY
+    }
+
+    func stopHardware() async throws {
+        if state == .OFFLINE || state == .CONNECTING {
+            throw RobotError.offline
+        }
+        _ = try await mqtt.sendData(
+            topic: MQTTTopic.stop,
+            payload: "",
+            timeout: 10
+        )
+    }
     
     func calibrate(_ position: SIMD3<Float>) async throws {
         try await calibrate {

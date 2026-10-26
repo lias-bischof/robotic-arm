@@ -65,7 +65,7 @@ The commands provided to control and monitor the robot are listed below.
 | `orientation` | Returns the current joint angles |
 | `position` | Returns the current joint positions |
 | `start` | Begins or continues execution of the planned path |
-| `stop` | Pauses execution of the planned path |
+| `stop` | Stops execution of the planned path and sends a hardware stop request (`machine/stop`) |
 | `clear` | Removes all waypoints from the path |
 | `reset` | Resets the path cursor |
 | `connect [host (default = 127.0.0.1)] [port (default = 8003)]` / `disconnect` | Starts or ends the MQTT connection |
@@ -244,6 +244,57 @@ To control the motors, the PICO controller sends step and direction signals to t
 
 The bridge software was developed with the assistance of AI agents and improved by our team. Each USB message is one JSON object. Before connecting to MQTT, the bridge sends a ping to the controller and waits for a response.
 
+<br>
+
+## Repository Structure and Setup
+
+| Location | Contents |
+|---|---|
+| Nova Frontend/ | macOS application, Xcode project and resolved Swift packages. |
+| Nova Backend:Bridge/ | C++ bridge, shared protocol, broker configuration and startup script. |
+| Nova Backend:Bridge/firmware/ | PICO firmware source. |
+| Nova Backend:Bridge/tests/ | Protocol, simulated firmware, MQTT contract and integration tests. |
+| CAD/Assets/ | Motor, gearbox, bearing, gripper and other component assets. |
+| CAD/CAD Modell:SHAPR/ | Native Shapr3D assembly. |
+| CAD/Drucke:STEP/ | Individual mechanical parts in STEP format. |
+| Protokoll/ | CAD views, screenshots, editable diagrams and driver manual. |
+
+### Build Requirements and Current Setup Gaps
+
+The frontend project is Nova Frontend/Nova.xcodeproj. Its configured macOS deployment target is 26.2. It uses SwiftUI, RealityKit and MQTTNIO, with MQTTNIO 2.13.0 recorded in Package.resolved.
+
+The bridge requires a C++17-capable compiler, libmosquitto and cJSON. Firmware compilation requires the Pico SDK, cJSON, access to the shared protocol.hpp header and USB standard I/O configuration.
+
+The startup script calls `make` before starting Mosquitto and the bridge. The repository now includes `/home/runner/work/robotic-arm/robotic-arm/Nova Backend:Bridge/Makefile` with targets for `robot_bridge` and the backend test executables (`make`, `make test`, `make clean`). Firmware flashing still requires a Pico SDK-based workflow in addition to these host-side targets.
+
+Once the bridge binary and flashed firmware are available, the bridge accepts --broker HOST, --mqtt-port PORT and --pico-port DEVICE. Without an explicit device, it searches for a unique /dev/cu.usbmodem* or /dev/ttyACM* port.
+
+### Coordinates, Angles and Stored State
+
+The model uses Y as the vertical axis and X–Z as the ground plane. The top-down path display therefore uses X–Z, clarifying the XY wording in the earlier overview.
+
+Terminal rotate commands specify relative changes in degrees. Internal angles and MQTT calibration arrays use radians. Shoulder and arm angles describe each link's elevation relative to the horizontal.
+
+Fallback lengths are 5.0 for the base, 15.0 for the shoulder and 10.0 for the arm. The code does not assign physical units to these values. Link lengths and input coordinates must use the same scale and match the real assembly.
+
+The inverse kinematics solver checks link-length reachability and considers the available circle-intersection solutions, choosing the smallest combined shoulder/arm angular change. It does not perform full collision checking or accept an independently specified gripper orientation.
+
+Joint state and waypoints are saved as JSON in the application's Application Support location: joint.basis.json, joint.shoulder.json, joint.arm.json and path.json. Missing or unreadable files trigger fallback values. Restoring saved state does not establish the physical pose after manual movement or a power cycle.
+
+### Included Tests
+
+| Source | Behaviour covered by the test code |
+|---|---|
+| test_protocol.cpp | Angle conversion, gripper mapping, JSON validation and limits. |
+| test_firmware.cpp | Simulated pulse counts, stop handling, USB loss and malformed input. |
+| test_mqtt_contract.cpp | Request IDs, state requests, busy rejection, receipts and retained commands. |
+| test_bridge.cpp | Test broker and simulated PICO via pseudo-terminal, including USB disconnection. |
+
+These are software tests, rather than measurements of payload, repeatability, motor temperature or electrical signal quality.
+
+<br>
+
+## Current Limitations and Further Documentation
 | Direction | Event | Description |
 |---|---|---|
 | Pico → Bridge | boot | Firmware is booted up |
@@ -257,6 +308,14 @@ The bridge software was developed with the assistance of AI agents and improved 
 | Pico → Bridge | error | Reports that an error occurred |
 
 
+- **Open-loop position:** No encoder feedback or automatic homing is implemented. Missed steps, backlash and structural deflection can separate the estimated pose from the physical pose.
+- **Frontend stop:** The terminal stop command now cancels frontend waypoint execution and publishes `machine/stop`. Stopping still depends on broker/USB connectivity and firmware response time.
+- **Gripper actions:** Waypoint execution now sends `open`/`close` actions to `machine/gripper` after reaching each target.
+- **Interrupted moves:** The bridge reports executed pulse counts, but the frontend receipt model does not use them to reconstruct partial movement. Physical and estimated state must be reconciled after interruption.
+- **Timeouts:** Frontend command requests now use a 120 s timeout to match the bridge execution window for active motions.
+- **Trajectory preview:** The preview uses model joint speeds, rather than motor feedback or an exact simulation of the firmware scheduler.
+- **Hardware revisions:** The electronics drawing labels motors as NEMA 17, while CAD assets include a NEMA 23 model. The older LaTeX draft describes a different controller/gripper configuration. Exact installed parts and driver settings still need an authoritative hardware list.
+- **Physical validation:** Checked-in source files do not establish measured repeatability, payload capacity or thermal performance.
 ## Current Limitations
 
 The current implementation of our project has the following limitations:
